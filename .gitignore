@@ -1,0 +1,19 @@
+# Dataset and local test outputs
+/raw-img/
+/dataset.zip
+/Results/
+
+# Build outputs
+/Part1/server
+/Part1/client
+/Part2_Case1/server
+/Part2_Case1/client
+/Part2_Case2/server
+/Part2_Case2/client
+/Part2_Case2_Enhanced/server
+/Part2_Case2_Enhanced/client
+*.o
+*.obj
+
+# Local download output
+/downloads/
