@@ -304,6 +304,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Cannot prepare output directories under: %s\n", argv[4]); socket_runtime_cleanup(); return 1;
     }
     start = monotonic_seconds();
+    /* Case 1 has no checkpoint state: a dropped connection restarts the topic. */
     for (attempt = 1; attempt <= 10000; ++attempt) {
         if (clear_flat_directory(staging_topic) != 0) { fprintf(stderr, "Cannot clear transfer staging directory\n"); break; }
         fd = connect_server(argv[1], port);
@@ -314,6 +315,7 @@ int main(int argc, char **argv) {
             result = receive_topic(fd, argv[3], staging_root, &bytes);
             CLOSESOCKET(fd);
         }
+        /* Do not replace the visible topic directory with an incomplete attempt. */
         if (result == 0) {
             if (commit_flat_directory(staging_topic, final_topic) != 0) { fprintf(stderr, "Cannot commit completed topic directory\n"); result = -1; }
             break;

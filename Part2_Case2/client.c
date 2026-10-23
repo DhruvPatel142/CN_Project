@@ -249,6 +249,7 @@ static int transfer_session(socket_t fd, const char *topic, const char *topic_di
                 free_message(&message); fclose(out); fprintf(stderr, "Protocol error while receiving file %s\n", files->items[i].name); return -2;
             }
             free_message(&message);
+            /* Report progress only after the chunk is flushed to the partial file. */
             if (send_checkpoint(fd, data_tx, session_id, i, file_offset + chunk_length) != 0) { fclose(out); return -1; }
             file_offset += chunk_length;
             offsets[i] = file_offset;

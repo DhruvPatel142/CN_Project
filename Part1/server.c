@@ -163,6 +163,7 @@ static int scan_files(const char *dir_path, file_list *list) {
     }
     closedir(dir);
 #endif
+    /* Stable ordering keeps every client listing consistent across runs. */
     if (list->count > 1) qsort(list->items, list->count, sizeof(*list->items), cmp_file);
     return 0;
 }
@@ -382,6 +383,7 @@ static DWORD WINAPI worker_main(LPVOID value) {
 static void *worker_main(void *value) {
     worker_arg *arg = (worker_arg *)value;
     socket_t fd = arg->fd; const topic_t *table = arg->topics; size_t count = arg->topic_count;
+    /* The worker owns this client socket; the main thread can accept another client. */
     free(arg); (void)serve_client(fd, table, count); return NULL;
 }
 #endif

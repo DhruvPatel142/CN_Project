@@ -377,6 +377,7 @@ static int serve_client(socket_t fd, const topic_t *table, size_t count, double 
             }
             offset += got;
             data_bytes_sent += got;
+            /* Draw once per transferred-byte interval, independent of send() chunking. */
             bytes_since_check += got;
             if (bytes_since_check >= IO_BUFFER_SIZE) {
                 bytes_since_check %= IO_BUFFER_SIZE;

@@ -32,6 +32,7 @@ void socket_runtime_cleanup(void) {
 }
 
 int send_all(socket_t fd, const void *buffer, size_t length) {
+    /* A successful send can write only part of a frame, so keep sending the remainder. */
     const char *p = (const char *)buffer;
     size_t done = 0;
     while (done < length) {
@@ -54,6 +55,7 @@ int send_all(socket_t fd, const void *buffer, size_t length) {
 }
 
 int recv_all(socket_t fd, void *buffer, size_t length) {
+    /* TCP is a byte stream; one recv is not guaranteed to fill the requested block. */
     char *p = (char *)buffer;
     size_t done = 0;
     while (done < length) {

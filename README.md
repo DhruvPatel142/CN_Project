@@ -45,9 +45,14 @@ four worker connections. All clients write topic files to `<output_dir>/<topic>/
 topics as immediate subdirectories of the supplied root directory; no dataset paths or topic names are
 embedded in the executables.
 
-## Excluded local files
+## Tests and results
 
-The large `raw-img/` dataset, `dataset.zip`, and generated `Results/` artifacts are kept out of this repository. Supply your own extracted topic folders when starting a server. The local test scripts and measurement outputs are not included.
+Run the Part 1 fixture checks with `python3 Results/test_part1.py`, the Part 1 throughput sweep with
+`python3 Results/benchmark_part1.py`, the Case 1/Case 2 probability matrix with
+`python3 Results/run_part2_failure_tests.py`, and the Enhanced probability/connection matrix and
+recovery checks with `python3 Results/test_case2_enhanced.py`. The scripts use temporary
+fixtures and do not alter `dataset.zip` or `raw-img/`. CSV summaries and captured server logs are in
+`Results/`. Generate the PNG charts from recorded CSV data with `python3 Results/generate_plots.py`.
 
 The implementations use a 28-byte network-order header/payload frame, exact-length socket helpers,
 and raw binary file contents. This follows the Instructor Protocol's general Header/Payload message
@@ -56,3 +61,12 @@ Protocol specifies a different fixed-layout `message_header` struct. These wire 
 the implementation follows the instructor's framing and the team's documented message names and
 transfer semantics. Part 2 fault checks use 65,536-byte intervals. The Part 1 `--single` option is an
 optional mode selector; the required two-argument server invocation remains the multi-threaded mode.
+
+## Assignment naming checklist
+
+The assignment requires the source folders to be named `Part1/`, `Part2_Case1/`,
+`Part2_Case2/`, and `Part2_Case2_Enhanced/`. Run `make` inside each folder; it creates exactly
+two runnable files there, named `server` and `client`. The final package should be named
+`FinalSubmission_Group_040_093.zip` (or `.tar.gz`) and contain a top-level
+`FinalSubmission_Group_040_093/` directory with `FinalReport_Group_040_093.pdf`, `README.md`,
+the four source folders, and `Results/`. The supplied dataset is not part of the required package.

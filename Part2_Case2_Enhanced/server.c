@@ -243,6 +243,7 @@ static int handle_worker(socket_t fd,uint64_t owner,uint64_t *rng,const message_
     if ((f->complete && requested != f->size) || f->owner || requested>f->offset || requested>f->size) {
         uint64_t cp=f->offset; mutex_unlock(&sessions_mutex); return send_error(fd,tx,3,cp);
     }
+    /* Reserve this file while locked; other workers may reserve different files. */
     f->owner=owner; f->offset=requested; s->touched=monotonic_seconds(); size=f->size; start=requested;
     if (join_path(path,sizeof(path),s->directory,f->name)) { f->owner=0; mutex_unlock(&sessions_mutex); return send_error(fd,tx,4,start); }
     char filename[FNAME_LEN]; file_state_t snapshot=*f; strcpy(filename,f->name);
@@ -274,6 +275,7 @@ static int handle_worker(socket_t fd,uint64_t owner,uint64_t *rng,const message_
             if (!ok) { fclose(fp); release_owner(sid,index,owner,0); return send_error(fd,tx,3,offset); }
             mutex_lock(&sessions_mutex); s=lookup_session(sid);
             if (!s || index>=s->count || s->files[index].owner!=owner) { mutex_unlock(&sessions_mutex); fclose(fp); return send_error(fd,tx,2,offset); }
+            /* The client-reported checkpoint is the only safe offset after a disconnect. */
             s->files[index].offset=offset; s->touched=monotonic_seconds(); mutex_unlock(&sessions_mutex);
             int interval_due = since >= CHECK_INTERVAL;
             since=0;

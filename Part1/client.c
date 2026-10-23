@@ -194,6 +194,7 @@ static int receive_topic(socket_t fd, const char *topic, const char *output_dir,
         if (send_ack(fd, header_tx, 1, topic, files.items[i].name, 0, 0) != 0) goto done;
         if (join_path(path, sizeof(path), topic_dir, files.items[i].name) != 0 ||
             snprintf(part_path, sizeof(part_path), "%s.part", path) >= (int)sizeof(part_path)) goto done;
+        /* Keep partial output separate until all bytes announced for this file arrive. */
         out = fopen(part_path, "wb");
         if (!out) { perror(part_path); goto done; }
         while (offset < announced_size) {

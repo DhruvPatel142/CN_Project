@@ -141,6 +141,7 @@ static int worker_transfer(app_t *a,unsigned worker,uint32_t idx,uint64_t *confi
             offset+=want; since+=want;
             mutex_lock(&a->lock); a->received+=want; mutex_unlock(&a->lock);
             if(since>=CHECK_INTERVAL || offset==size) {
+                /* On reconnect, bytes beyond this flushed checkpoint are discarded locally. */
                 if(fflush(out)!=0) { failed=1; break; }
                 unsigned char cp[16]; put_u32(cp,a->session_id); put_u32(cp+4,idx); put_u64(cp+8,offset);
                 if(send_message(fd,"CHECKPOINT",tx,cp,sizeof(cp))) { failed=1; break; }
@@ -176,6 +177,7 @@ static THREAD_RETURN worker_main(THREAD_ARG arg) {
     worker_arg_t *w=(worker_arg_t *)arg; app_t *a=w->app; unsigned id=w->id; socket_t connection=(socket_t)-1;
     for(;;) {
         uint32_t idx;
+        /* Claim a whole file under the mutex; each worker writes a distinct output file. */
         mutex_lock(&a->lock); if(a->failed || a->next>=a->count) { mutex_unlock(&a->lock); break; } idx=a->next++; mutex_unlock(&a->lock);
         uint64_t confirmed=a->files[idx].confirmed;
         if(worker_transfer(a,id,idx,&confirmed,&connection)!=0) { mutex_lock(&a->lock); a->failed=1; mutex_unlock(&a->lock); break; }

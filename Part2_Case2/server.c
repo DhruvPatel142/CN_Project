@@ -497,6 +497,7 @@ static int stream_session(socket_t fd, session_t *session, uint32_t start_index,
             if (got != want || send_data_message(fd, data_tx, session->id, i, session->topic,
                     session->files.items[i].name, offset, buffer, (uint32_t)got) != 0) { fclose(in); return -1; }
             confirmed_offset = offset + got;
+            /* Advance the session only after the client confirms its saved checkpoint. */
             if (receive_checkpoint(fd, session, session->id, i, data_tx, confirmed_offset) != 0) { fclose(in); return -1; }
             *data_bytes_sent += got;
             offset = confirmed_offset;
